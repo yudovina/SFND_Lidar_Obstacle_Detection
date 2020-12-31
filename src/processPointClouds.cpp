@@ -32,14 +32,14 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(
     vg.setDownsampleAllData(true);
     vg.setLeafSize(Eigen::Vector4f(filterRes,filterRes,filterRes,0));
     vg.setInputCloud(cloud);
-    pcl::PointCloud<PointT>::Ptr voxelGridCloud(new pcl::PointCloud<PointT>());
+    typename pcl::PointCloud<PointT>::Ptr voxelGridCloud(new pcl::PointCloud<PointT>());
     vg.filter(*voxelGridCloud);
 
     pcl::CropBox<PointT> cb;
     cb.setMin(Eigen::Vector4f(minPoint));
     cb.setMax(Eigen::Vector4f(maxPoint));
     cb.setInputCloud(voxelGridCloud);
-    pcl::PointCloud<PointT>::Ptr croppedCloud(new pcl::PointCloud<PointT>());
+    typename pcl::PointCloud<PointT>::Ptr croppedCloud(new pcl::PointCloud<PointT>());
     cb.filter(*croppedCloud);
 
     // removing car roof requires jumping through hoops:
@@ -60,7 +60,7 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(
     ex.setInputCloud(croppedCloud);
     ex.setIndices(roofPointIndices);
     ex.setNegative(true);
-    pcl::PointCloud<PointT>::Ptr noRoofCloud(new pcl::PointCloud<PointT>());
+    typename pcl::PointCloud<PointT>::Ptr noRoofCloud(new pcl::PointCloud<PointT>());
     ex.filter(*noRoofCloud);
 
     auto endTime = std::chrono::steady_clock::now();
@@ -132,7 +132,7 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
     std::vector<std::vector<float>> cloudPoints;
     for (int i = 0; i < cloud->points.size(); i++)
     {
-        typename PointT p = cloud->points[i];
+        PointT p = cloud->points[i];
         std::vector<float> pVec;
         pVec.push_back(p.x);
         pVec.push_back(p.y);

@@ -6,6 +6,8 @@
 #define KDTREE_H_
 
 #include <vector>
+#include <cmath>
+#include <cstddef> // how did the quiz get away with NULL's without this??
 
 // Structure to represent node of kd tree
 struct Node
