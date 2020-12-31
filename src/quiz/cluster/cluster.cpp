@@ -18,7 +18,8 @@ pcl::visualization::PCLVisualizer::Ptr initScene(Box window, int zoom)
   	viewer->setCameraPosition(0, 0, zoom, 0, 1, 0);
   	viewer->addCoordinateSystem (1.0);
 
-  	viewer->addCube(window.x_min, window.x_max, window.y_min, window.y_max, 0, 0, 1, 1, 1, "window");
+  	//viewer->addCube(window.x_min, window.x_max, window.y_min, window.y_max, 0, 0, 1, 1, 1, "window");
+    viewer->addCube(window.x_min, window.x_max, window.y_min, window.y_max, 0, 0, 0, 0, 0, "window");
   	return viewer;
 }
 
@@ -44,7 +45,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr CreateData(std::vector<std::vector<float>> p
 }
 
 
-void render2DTree(Node* node, pcl::visualization::PCLVisualizer::Ptr& viewer, Box window, int& iteration, uint depth=0)
+void render2DTree(Node* node, pcl::visualization::PCLVisualizer::Ptr& viewer, Box window, int& iteration, unsigned int depth=0)
 {
 
 	if(node!=NULL)
@@ -75,15 +76,36 @@ void render2DTree(Node* node, pcl::visualization::PCLVisualizer::Ptr& viewer, Bo
 
 }
 
+void addPointAndNeighborsToTree(int pointIdx, const std::vector<std::vector<float>> points, std::vector<bool>& processed,
+    std::vector<int>& cluster, float distanceTol, KdTree* tree)
+{
+    if (processed[pointIdx])
+        return;
+
+    processed[pointIdx] = true;
+    cluster.push_back(pointIdx);
+
+    std::vector<int> nearbyPoints = tree->search(points[pointIdx], distanceTol);
+    for (int nearbyPointIdx : nearbyPoints) {
+        if (!processed[nearbyPointIdx]) {
+            addPointAndNeighborsToTree(nearbyPointIdx, points, processed, cluster, distanceTol, tree);
+        }
+    }
+}
+
 std::vector<std::vector<int>> euclideanCluster(const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol)
 {
-
-	// TODO: Fill out this function to return list of indices for each cluster
-
 	std::vector<std::vector<int>> clusters;
- 
-	return clusters;
+    std::vector<bool> processed(points.size(), false);
 
+    for (int pointIdx = 0; pointIdx < points.size(); pointIdx++) {
+        if (!processed[pointIdx]) {
+            std::vector<int> newCluster;
+            addPointAndNeighborsToTree(pointIdx, points, processed, newCluster, distanceTol, tree);
+            clusters.push_back(newCluster);
+        }
+    }
+	return clusters;
 }
 
 int main ()
